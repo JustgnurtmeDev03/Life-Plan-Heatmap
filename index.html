@@ -1138,18 +1138,6 @@
     </div>
 
     <script>
-      // Helper: lấy YYYY-MM-DD theo giờ địa phương (tránh lỗi UTC)
-      function ymdLocal(date = new Date()) {
-        const d = new Date(date);
-        const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-        return local.toISOString().slice(0, 10);
-      }
-
-      function norm(v) {
-        return String(v || "")
-          .trim()
-          .toLowerCase();
-      }
       // ═══════════════════════════════════════════════
       // CONSTANTS
       // ═══════════════════════════════════════════════
@@ -1628,23 +1616,41 @@
       // ═══════════════════════════════════════════════
       // LAYER 2: TYPE HEATMAPS
       // ═══════════════════════════════════════════════
+      function norm(v) {
+        return String(v || "")
+          .trim()
+          .toLowerCase();
+      }
+
+      function ymdLocal(date = new Date()) {
+        const d = new Date(date);
+        const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+        return local.toISOString().slice(0, 10); // YYYY-MM-DD
+      }
+
       function renderTypeHMs() {
         const grid = document.getElementById("tgrid");
         grid.innerHTML = "";
         const WEEKS = 26;
         const now = new Date();
 
+        // Đầu tuần của mốc 26 tuần trước
+        const start = new Date(now);
+        start.setDate(start.getDate() - WEEKS * 7);
+        start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+
         TYPES.forEach((type) => {
           const map = {};
+
           S.entries
             .filter((e) => e.done && norm(e.type) === norm(type.id))
             .forEach((e) => {
               map[e.date] = (map[e.date] || 0) + 1;
             });
+
           const total = Object.values(map).reduce((a, b) => a + b, 0);
           const days = Object.keys(map).length;
 
-          // Streak for this type
           let tStreak = 0;
           for (let i = 0; i < 365; i++) {
             const d = new Date(now);
@@ -1663,7 +1669,9 @@
       </div>
       <div class="thm" id="thm-${type.id}"></div>
       <div class="tfoot">
-        <span class="tstreak">26 tuần gần nhất</span>
+        <span class="tstreak">26 tuần gần nhất · ${start.toLocaleDateString(
+          "vi-VN"
+        )} → ${now.toLocaleDateString("vi-VN")}</span>
         <span style="flex:1"></span>
         ${
           tStreak > 0
@@ -1674,40 +1682,42 @@
           grid.appendChild(card);
 
           const hmEl = document.getElementById(`thm-${type.id}`);
-          // Start Monday of 26 weeks ago
-          const anchor = new Date(now);
-          anchor.setDate(
-            anchor.getDate() - WEEKS * 7 - ((anchor.getDay() + 6) % 7)
-          );
 
           for (let col = 0; col < WEEKS; col++) {
             const wk = document.createElement("div");
             wk.className = "twk";
+
             for (let row = 0; row < 7; row++) {
-              const d = new Date(anchor);
+              const d = new Date(start);
               d.setDate(d.getDate() + col * 7 + row);
+
               if (d > now) break;
-              const ds = d.toLocaleDateString("en-CA");
+
+              const ds = ymdLocal(d);
               const n = map[ds] || 0;
+
               const cell = document.createElement("div");
               cell.className = "tcell";
               cell.style.background =
                 n === 0 ? "var(--bg3)" : type.ramp[Math.min(n, 4)];
+
               const label = d.toLocaleDateString("vi-VN", {
                 day: "2-digit",
                 month: "2-digit",
+                year: "numeric",
               });
               tip(
                 cell,
                 `${label}: ${n === 0 ? "Không có" : n + " " + type.id}`
               );
+
               wk.appendChild(cell);
             }
+
             hmEl.appendChild(wk);
           }
         });
       }
-
       // ═══════════════════════════════════════════════
       // LAYER 3: STREAK
       // ═══════════════════════════════════════════════
