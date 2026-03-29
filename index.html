@@ -1434,7 +1434,7 @@
         for (let i = 0; i < 365; i++) {
           const d = new Date(today);
           d.setDate(d.getDate() - i);
-          if (doneSet.has(d.toLocaleDateString("en-CA"))) cur++;
+          if (doneSet.has(ymdLocal(d))) cur++;
           else break;
         }
         let best = 0,
@@ -1449,7 +1449,7 @@
           prev = ds;
         });
 
-        const moStr = today.toLocaleDateString("en-CA").substring(0, 7);
+        const moStr = ymdLocal(today).slice(0, 7);
         const monthDays = new Set(
           done.filter((e) => e.date.startsWith(moStr)).map((e) => e.date)
         ).size;
@@ -1574,7 +1574,7 @@
               cell.style.background = "var(--bg3)";
             } else {
               const d = new Date(year, 0, idx + 1);
-              const ds = d.toLocaleDateString("en-CA");
+              const ds = ymdLocal(d);
               const n = map[ds] || 0;
               cell.style.background = n === 0 ? "var(--bg3)" : overallColor(n);
               if (n > 0) {
@@ -1641,8 +1641,7 @@
           for (let i = 0; i < 365; i++) {
             const d = new Date(now);
             d.setDate(d.getDate() - i);
-            const ds = d.toLocaleDateString("en-CA");
-            if (map[ds]) tStreak++;
+            if (map[ymdLocal(d)]) tStreak++;
             else break;
           }
 
@@ -1853,7 +1852,7 @@
           calEl.appendChild(e);
         }
 
-        const todayStr = new Date().toLocaleDateString("en-CA");
+        const todayStr = ymdLocal();
 
         for (let d = 1; d <= days; d++) {
           const ds = `${moStr}-${String(d).padStart(2, "0")}`;

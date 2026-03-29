@@ -59,28 +59,26 @@ export default async function handler(req, res) {
         const typeP = props[typeProp] || {};
         const statusP = props[statusProp] || {};
 
-        // 📅 Lấy date chuẩn local (fix lệch timezone)
         const rawDate = dateP?.date?.start;
         if (!rawDate) return null;
 
         const d = new Date(rawDate);
-        const localDate = d.toLocaleDateString("en-CA"); // YYYY-MM-DD
+        const localDate = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+          .toISOString()
+          .slice(0, 10);
 
-        // 🏷️ Lấy type
         const type =
           typeP?.select?.name || typeP?.multi_select?.[0]?.name || "Other";
 
-        // 📊 Lấy status (property type = status)
         const status = statusP?.status?.name || statusP?.select?.name || "";
 
-        // 🔥 Normalize để tránh sai "Done" vs "done"
         const normalizedStatus = status.toLowerCase().trim();
 
         return {
           date: localDate,
           type,
           status,
-          done: ["done", "completed"].includes(normalizedStatus),
+          done: ["done", "completed", "hoàn thành"].includes(normalizedStatus),
         };
       })
       .filter(Boolean);
