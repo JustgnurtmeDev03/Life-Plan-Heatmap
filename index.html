@@ -1,0 +1,1900 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Life Plan — Activity Heatmap</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --bg: #ffffff;
+        --bg2: #f8f8f7;
+        --bg3: #eeede9;
+        --text: #191919;
+        --text2: #6b6b68;
+        --text3: #a8a8a5;
+        --bd: rgba(55, 53, 47, 0.09);
+        --bd2: rgba(55, 53, 47, 0.18);
+        --r: 8px;
+        --rl: 12px;
+        --green: #1d9e75;
+        --green-l: #e1f5ee;
+        --green-d: #085041;
+        --blue: #378add;
+        --blue-l: #e6f1fb;
+        --blue-d: #0c447c;
+        --purple: #7f77dd;
+        --purple-l: #eeedfe;
+        --purple-d: #3c3489;
+        --coral: #d85a30;
+        --coral-l: #faece7;
+        --coral-d: #993c1d;
+        --amber: #ef9f27;
+        --amber-l: #faeeda;
+        --amber-d: #633806;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #191919;
+          --bg2: #242424;
+          --bg3: #2e2e2e;
+          --text: #e8e8e5;
+          --text2: #9b9b97;
+          --text3: #6b6b68;
+          --bd: rgba(255, 255, 255, 0.07);
+          --bd2: rgba(255, 255, 255, 0.14);
+          --green-l: #04342c;
+          --blue-l: #042c53;
+          --purple-l: #26215c;
+          --coral-l: #4a1b0c;
+          --amber-l: #412402;
+        }
+      }
+
+      body {
+        font-family: -apple-system, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        font-size: 14px;
+        line-height: 1.5;
+        min-height: 100vh;
+      }
+
+      /* ── LAYOUT ── */
+      .page {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 4rem;
+      }
+
+      /* ── HEADER ── */
+      .header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 1.75rem;
+        gap: 1rem;
+      }
+      .page-title {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+      .page-sub {
+        font-size: 12px;
+        color: var(--text2);
+        margin-top: 3px;
+      }
+      .header-actions {
+        display: flex;
+        gap: 6px;
+        flex-shrink: 0;
+      }
+
+      /* ── BUTTONS ── */
+      .btn {
+        padding: 6px 14px;
+        border-radius: var(--r);
+        border: 0.5px solid var(--bd2);
+        background: var(--bg2);
+        color: var(--text);
+        font-size: 12px;
+        cursor: pointer;
+        transition: background 0.12s;
+      }
+      .btn:hover {
+        background: var(--bg3);
+      }
+      .btn-primary {
+        background: var(--green);
+        color: #fff;
+        border-color: var(--green);
+      }
+      .btn-primary:hover {
+        background: #0f6e56;
+      }
+
+      /* ── STATUS BAR ── */
+      .status-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 12px;
+        color: var(--text2);
+        padding: 0.6rem 1rem;
+        background: var(--bg2);
+        border-radius: var(--r);
+        margin-bottom: 1.75rem;
+        border: 0.5px solid var(--bd);
+      }
+      .sdot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--bd2);
+        flex-shrink: 0;
+        transition: background 0.3s;
+      }
+      .sdot.ok {
+        background: var(--green);
+      }
+      .sdot.err {
+        background: #e24b4a;
+      }
+      .sdot.loading {
+        background: var(--amber);
+        animation: blink 1s infinite;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.35;
+        }
+      }
+      .status-refresh {
+        margin-left: auto;
+        font-size: 11px;
+        color: var(--text3);
+      }
+
+      /* ── STATS ROW ── */
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-bottom: 2rem;
+      }
+      .stat {
+        background: var(--bg2);
+        border-radius: var(--r);
+        padding: 1rem 1.25rem;
+        border: 0.5px solid var(--bd);
+      }
+      .stat-num {
+        font-size: 30px;
+        font-weight: 600;
+        line-height: 1;
+        letter-spacing: -0.02em;
+      }
+      .stat-lbl {
+        font-size: 11px;
+        color: var(--text2);
+        margin-top: 5px;
+        letter-spacing: 0.02em;
+      }
+      .stat-sub {
+        font-size: 10px;
+        color: var(--text3);
+        margin-top: 2px;
+      }
+
+      /* ── SECTION ── */
+      .section {
+        margin-bottom: 2rem;
+      }
+      .sec-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text3);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .sec-title::before {
+        content: "";
+        display: inline-block;
+        width: 3px;
+        height: 12px;
+        border-radius: 2px;
+        background: var(--green);
+        flex-shrink: 0;
+      }
+      .sec-title::after {
+        content: "";
+        flex: 1;
+        height: 0.5px;
+        background: var(--bd);
+      }
+
+      /* ── CARD ── */
+      .card {
+        background: var(--bg);
+        border: 0.5px solid var(--bd);
+        border-radius: var(--rl);
+        padding: 1.25rem;
+      }
+      .card-hd {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        gap: 1rem;
+      }
+      .card-title {
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .card-meta {
+        font-size: 12px;
+        color: var(--text2);
+        margin-top: 2px;
+      }
+
+      /* ── YEAR TABS ── */
+      .ytabs {
+        display: flex;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+      .ytab {
+        font-size: 12px;
+        padding: 4px 12px;
+        border-radius: 999px;
+        border: 0.5px solid var(--bd2);
+        cursor: pointer;
+        color: var(--text2);
+        background: transparent;
+        transition: all 0.15s;
+        white-space: nowrap;
+      }
+      .ytab.active {
+        background: var(--green);
+        color: #fff;
+        border-color: var(--green);
+      }
+
+      /* ── HEATMAP: MAIN ── */
+      .hm-scroll {
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+      .hm-wrap {
+        display: inline-flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .hm-month-row {
+        display: flex;
+        margin-left: 32px;
+        gap: 0;
+        margin-bottom: 4px;
+      }
+      .hm-ml {
+        font-size: 10px;
+        color: var(--text3);
+        text-align: left;
+        pointer-events: none;
+      }
+      .hm-body-row {
+        display: flex;
+        gap: 4px;
+      }
+      .hm-dlbls {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        margin-right: 4px;
+        width: 28px;
+        flex-shrink: 0;
+      }
+      .hm-dl {
+        font-size: 10px;
+        color: var(--text3);
+        height: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+      }
+      .hm-grid {
+        display: flex;
+        gap: 3px;
+      }
+      .hm-week {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .hm-cell {
+        width: 13px;
+        height: 13px;
+        border-radius: 2px;
+        cursor: pointer;
+        transition: transform 0.1s, opacity 0.1s;
+        flex-shrink: 0;
+      }
+      .hm-cell:hover {
+        transform: scale(1.4);
+        z-index: 2;
+        position: relative;
+      }
+
+      /* ── HEATMAP: TYPE ── */
+      .tgrid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .tcard {
+        background: var(--bg);
+        border: 0.5px solid var(--bd);
+        border-radius: var(--rl);
+        padding: 1rem;
+      }
+      .thead {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 0.75rem;
+      }
+      .tdot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .tname {
+        font-size: 13px;
+        font-weight: 500;
+        flex: 1;
+      }
+      .tcnt {
+        font-size: 11px;
+        color: var(--text2);
+      }
+      .thm {
+        display: flex;
+        gap: 2px;
+        overflow: hidden;
+      }
+      .twk {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .tcell {
+        width: 10px;
+        height: 10px;
+        border-radius: 1px;
+        cursor: pointer;
+        transition: opacity 0.1s;
+      }
+      .tcell:hover {
+        opacity: 0.65;
+      }
+      .tfoot {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+      }
+      .tstreak {
+        font-size: 10px;
+        color: var(--text2);
+      }
+      .tbadge {
+        font-size: 10px;
+        padding: 1px 7px;
+        border-radius: 99px;
+        font-weight: 500;
+      }
+
+      /* ── LEGEND ── */
+      .legend {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .ltxt {
+        font-size: 10px;
+        color: var(--text3);
+      }
+      .lcells {
+        display: flex;
+        gap: 2px;
+      }
+      .lcell {
+        width: 11px;
+        height: 11px;
+        border-radius: 2px;
+      }
+
+      /* ── STREAK LAYER ── */
+      .sk-layout {
+        display: flex;
+        gap: 1.5rem;
+        align-items: flex-start;
+      }
+      .sk-nums {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+      .sk-box {
+        background: var(--bg2);
+        border-radius: var(--r);
+        padding: 0.85rem 1.5rem;
+        text-align: center;
+        min-width: 100px;
+        border: 0.5px solid var(--bd);
+      }
+      .sk-val {
+        font-size: 34px;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.03em;
+      }
+      .sk-lbl {
+        font-size: 10px;
+        color: var(--text2);
+        margin-top: 3px;
+      }
+      .sk-right {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .bar-section-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text3);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 10px;
+      }
+      .bar-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 9px;
+      }
+      .bar-name {
+        font-size: 12px;
+        color: var(--text2);
+        width: 82px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .bar-track {
+        flex: 1;
+        height: 7px;
+        background: var(--bg3);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .bar-fill {
+        height: 100%;
+        border-radius: 4px;
+      }
+      .bar-pct {
+        font-size: 11px;
+        color: var(--text);
+        width: 32px;
+        text-align: right;
+        flex-shrink: 0;
+        font-weight: 500;
+      }
+      .sk-pills {
+        display: flex;
+        gap: 8px;
+        margin-top: 1.25rem;
+        padding-top: 1rem;
+        border-top: 0.5px solid var(--bd);
+        flex-wrap: wrap;
+      }
+      .pill {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 10px;
+        border-radius: 99px;
+        font-size: 11px;
+        border: 0.5px solid var(--bd2);
+      }
+      .pill-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      /* ── MONTHLY GRID ── */
+      .mgrid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 8px;
+      }
+      .mcard {
+        background: var(--bg2);
+        border-radius: var(--r);
+        padding: 0.8rem;
+        cursor: pointer;
+        transition: all 0.15s;
+        border: 1.5px solid transparent;
+      }
+      .mcard:hover {
+        border-color: var(--bd2);
+        background: var(--bg);
+      }
+      .mcard.sel {
+        border-color: var(--green);
+        background: var(--bg);
+      }
+      .mcard-name {
+        font-size: 12px;
+        font-weight: 500;
+        margin-bottom: 6px;
+        color: var(--text);
+      }
+      .mini-hm {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 1.5px;
+        margin-bottom: 5px;
+      }
+      .mini-cell {
+        height: 5px;
+        border-radius: 1px;
+      }
+      .mcard-stat {
+        font-size: 10px;
+        color: var(--text3);
+      }
+
+      /* ── MONTH DETAIL ── */
+      .mdetail {
+        background: var(--bg2);
+        border-radius: var(--rl);
+        padding: 1.25rem;
+        margin-top: 10px;
+        display: none;
+        border: 0.5px solid var(--bd);
+      }
+      .mdetail.show {
+        display: block;
+      }
+      .mcal {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
+        margin-top: 1rem;
+      }
+      .cday-hd {
+        font-size: 10px;
+        color: var(--text3);
+        text-align: center;
+        padding: 2px 0;
+        font-weight: 500;
+      }
+      .cday {
+        border-radius: var(--r);
+        padding: 5px;
+        min-height: 54px;
+        border: 0.5px solid var(--bd);
+        background: var(--bg);
+        transition: border-color 0.12s;
+      }
+      .cday:hover {
+        border-color: var(--bd2);
+      }
+      .cday.has-act {
+        background: var(--bg2);
+      }
+      .cday.today {
+        border-color: var(--green);
+      }
+      .cday-num {
+        font-size: 10px;
+        color: var(--text3);
+        margin-bottom: 3px;
+        font-weight: 500;
+      }
+      .cday.today .cday-num {
+        color: var(--green);
+        font-weight: 700;
+      }
+      .cday-tag {
+        font-size: 9px;
+        padding: 1px 5px;
+        border-radius: 3px;
+        margin-top: 1px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 500;
+      }
+      .cday-more {
+        font-size: 9px;
+        color: var(--text3);
+        margin-top: 1px;
+        padding-left: 2px;
+      }
+      .cempty {
+        min-height: 54px;
+      }
+
+      /* ── CONFIG PANEL ── */
+      .cfg-fab {
+        position: fixed;
+        bottom: 18px;
+        right: 18px;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: var(--bg2);
+        border: 0.5px solid var(--bd2);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        z-index: 200;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        transition: transform 0.15s;
+      }
+      .cfg-fab:hover {
+        transform: rotate(45deg);
+      }
+      .cfg-panel {
+        position: fixed;
+        bottom: 66px;
+        right: 18px;
+        background: var(--bg);
+        border: 0.5px solid var(--bd2);
+        border-radius: var(--rl);
+        padding: 1.25rem;
+        width: 340px;
+        z-index: 200;
+        display: none;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      }
+      .cfg-panel.show {
+        display: block;
+      }
+      .cfg-title {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .cfg-section {
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--text3);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin: 1rem 0 0.5rem;
+      }
+      .cfg-row {
+        margin-bottom: 0.65rem;
+      }
+      .cfg-lbl {
+        font-size: 11px;
+        color: var(--text2);
+        margin-bottom: 4px;
+      }
+      .cfg-inp {
+        width: 100%;
+        padding: 6px 10px;
+        border: 0.5px solid var(--bd2);
+        border-radius: var(--r);
+        background: var(--bg2);
+        color: var(--text);
+        font-size: 12px;
+        outline: none;
+        font-family: inherit;
+      }
+      .cfg-inp:focus {
+        border-color: var(--green);
+      }
+      .cfg-inp.mono {
+        font-family: monospace;
+      }
+      .cfg-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 1rem;
+      }
+      .cfg-note {
+        font-size: 10px;
+        color: var(--text3);
+        margin-top: 0.75rem;
+        line-height: 1.6;
+        padding-top: 0.75rem;
+        border-top: 0.5px solid var(--bd);
+      }
+
+      /* ── GUIDE BANNER ── */
+      .guide {
+        background: var(--blue-l);
+        border: 0.5px solid var(--bd);
+        border-radius: var(--rl);
+        padding: 1.25rem;
+        margin-bottom: 1.75rem;
+        display: none;
+      }
+      .guide.show {
+        display: block;
+      }
+      .guide-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--blue-d);
+        margin-bottom: 0.75rem;
+      }
+      .guide-steps {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .guide-step {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+      }
+      .guide-num {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--blue);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+      .guide-text {
+        font-size: 12px;
+        color: var(--blue-d);
+        line-height: 1.6;
+      }
+      .guide-text code {
+        background: rgba(55, 138, 221, 0.15);
+        padding: 1px 5px;
+        border-radius: 3px;
+        font-family: monospace;
+        font-size: 11px;
+      }
+      .guide-close {
+        float: right;
+        cursor: pointer;
+        font-size: 12px;
+        color: var(--blue-d);
+        opacity: 0.6;
+      }
+      .guide-close:hover {
+        opacity: 1;
+      }
+
+      /* ── TOOLTIP ── */
+      #tip {
+        position: fixed;
+        background: var(--bg);
+        border: 0.5px solid var(--bd2);
+        border-radius: var(--r);
+        padding: 6px 10px;
+        font-size: 11px;
+        color: var(--text);
+        pointer-events: none;
+        display: none;
+        z-index: 999;
+        white-space: nowrap;
+        max-width: 220px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      }
+
+      /* ── RESPONSIVE ── */
+      @media (max-width: 640px) {
+        .page {
+          padding: 1rem 1rem 5rem;
+        }
+        .stats {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .tgrid {
+          grid-template-columns: 1fr;
+        }
+        .mgrid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+        .sk-layout {
+          flex-direction: column;
+        }
+        .sk-nums {
+          flex-direction: row;
+          flex-wrap: wrap;
+        }
+        .sk-box {
+          min-width: 80px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <!-- Header -->
+      <div class="header">
+        <div>
+          <div class="page-title">Activity Heatmap</div>
+          <div class="page-sub" id="last-sync">
+            Chưa kết nối — nhấn ⚙️ để cài đặt
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="btn" onclick="refresh()">↺ Làm mới</button>
+          <button class="btn" onclick="showGuide()">? Hướng dẫn</button>
+        </div>
+      </div>
+
+      <!-- Guide Banner -->
+      <div class="guide" id="guide-banner">
+        <span
+          class="guide-close"
+          onclick="document.getElementById('guide-banner').classList.remove('show')"
+          >✕ Đóng</span
+        >
+        <div class="guide-title">Cách kết nối Notion</div>
+        <div class="guide-steps">
+          <div class="guide-step">
+            <div class="guide-num">1</div>
+            <div class="guide-text">
+              Vào <strong>notion.so/my-integrations</strong> → tạo Integration
+              mới → copy <strong>Internal Integration Token</strong>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-num">2</div>
+            <div class="guide-text">
+              Mở database <strong>Activity Log</strong> trong Notion → Share →
+              Invite integration bạn vừa tạo
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-num">3</div>
+            <div class="guide-text">
+              Copy <strong>Database ID</strong> từ URL:
+              <code
+                >notion.so/[workspace]/<strong>DATABASE_ID</strong>?v=...</code
+              >
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-num">4</div>
+            <div class="guide-text">
+              Nhấn ⚙️ bên dưới → paste Token & Database ID →
+              <strong>Kết nối</strong>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-num">5</div>
+            <div class="guide-text">
+              Tạo database với properties: <code>Date</code> (date),
+              <code>Type</code> (select), <code>Status</code> (select),
+              <code>Intensity</code> (number)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Bar -->
+      <div class="status-bar">
+        <div class="sdot" id="sdot"></div>
+        <span id="stext"
+          >Nhấn ⚙️ để kết nối Notion, hoặc xem Demo để trải nghiệm trước</span
+        >
+        <span class="status-refresh" id="next-refresh"></span>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-num" style="color: var(--green)" id="s-days">—</div>
+          <div class="stat-lbl">Ngày hoạt động</div>
+          <div class="stat-sub" id="s-days-sub">năm nay</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" style="color: var(--blue)" id="s-streak">—</div>
+          <div class="stat-lbl">Streak hiện tại</div>
+          <div class="stat-sub">ngày liên tục</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" style="color: var(--purple)" id="s-best">—</div>
+          <div class="stat-lbl">Streak tốt nhất</div>
+          <div class="stat-sub">kỷ lục cá nhân</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" style="color: var(--coral)" id="s-rate">—</div>
+          <div class="stat-lbl">Hoàn thành</div>
+          <div class="stat-sub" id="s-rate-sub">tỉ lệ overall</div>
+        </div>
+      </div>
+
+      <!-- LAYER 1: Annual Heatmap -->
+      <div class="section">
+        <div class="sec-title">Layer 1 — Tổng quan cả năm &amp; lịch sử</div>
+        <div class="card">
+          <div class="card-hd">
+            <div>
+              <div class="card-title">Lịch sử hoạt động theo ngày</div>
+              <div class="card-meta" id="year-meta">Đang tải...</div>
+            </div>
+            <div class="ytabs" id="ytabs"></div>
+          </div>
+          <div class="hm-scroll">
+            <div class="hm-wrap">
+              <div class="hm-month-row" id="mrow"></div>
+              <div class="hm-body-row">
+                <div class="hm-dlbls">
+                  <div class="hm-dl"></div>
+                  <div class="hm-dl">T2</div>
+                  <div class="hm-dl"></div>
+                  <div class="hm-dl">T4</div>
+                  <div class="hm-dl"></div>
+                  <div class="hm-dl">T6</div>
+                  <div class="hm-dl"></div>
+                </div>
+                <div class="hm-grid" id="main-hm"></div>
+              </div>
+            </div>
+          </div>
+          <div
+            style="
+              display: flex;
+              justify-content: flex-end;
+              margin-top: 0.75rem;
+            "
+          >
+            <div class="legend">
+              <span class="ltxt">Ít hơn</span>
+              <div class="lcells" id="main-leg"></div>
+              <span class="ltxt">Nhiều hơn</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LAYER 2: Per-Type Heatmaps -->
+      <div class="section">
+        <div class="sec-title">Layer 2 — Heatmap theo từng loại hoạt động</div>
+        <div class="tgrid" id="tgrid"></div>
+      </div>
+
+      <!-- LAYER 3: Streak & Stats -->
+      <div class="section">
+        <div class="sec-title">Layer 3 — Streak &amp; phân tích hiệu suất</div>
+        <div class="card">
+          <div class="sk-layout">
+            <div class="sk-nums">
+              <div class="sk-box">
+                <div class="sk-val" style="color: var(--green)" id="sk-cur">
+                  0
+                </div>
+                <div class="sk-lbl">ngày liên tục</div>
+              </div>
+              <div class="sk-box">
+                <div
+                  class="sk-val"
+                  style="color: var(--purple); font-size: 26px"
+                  id="sk-best"
+                >
+                  0
+                </div>
+                <div class="sk-lbl">kỷ lục tốt nhất</div>
+              </div>
+              <div class="sk-box">
+                <div
+                  class="sk-val"
+                  style="color: var(--blue); font-size: 22px"
+                  id="sk-month"
+                >
+                  0
+                </div>
+                <div class="sk-lbl">ngày tháng này</div>
+              </div>
+              <div class="sk-box">
+                <div
+                  class="sk-val"
+                  style="color: var(--amber); font-size: 20px"
+                  id="sk-total"
+                >
+                  0
+                </div>
+                <div class="sk-lbl">tasks tổng cộng</div>
+              </div>
+            </div>
+            <div class="sk-right" id="sk-right">
+              <div class="bar-section-title">Tỉ lệ hoàn thành theo loại</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LAYER 4: Monthly Drill-down -->
+      <div class="section">
+        <div class="sec-title">Layer 4 — Chi tiết theo tháng</div>
+        <div class="mgrid" id="mgrid"></div>
+        <div class="mdetail" id="mdetail">
+          <div class="card-hd">
+            <div>
+              <div class="card-title" id="mdetail-title">Chi tiết tháng</div>
+              <div class="card-meta" id="mdetail-meta"></div>
+            </div>
+            <button
+              class="btn"
+              style="font-size: 11px; padding: 4px 10px"
+              onclick="closeDetail()"
+            >
+              ✕ Đóng
+            </button>
+          </div>
+          <div class="mcal" id="mcal"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tooltip -->
+    <div id="tip"></div>
+
+    <!-- Config FAB -->
+    <button
+      class="cfg-fab"
+      onclick="toggleCfg()"
+      title="Cài đặt kết nối Notion"
+    >
+      ⚙️
+    </button>
+    <div class="cfg-panel" id="cfg-panel">
+      <div class="cfg-title">🔗 Kết nối Notion</div>
+
+      <div class="cfg-section">Thông tin kết nối</div>
+      <div class="cfg-row">
+        <div class="cfg-lbl">Integration Token</div>
+        <input
+          class="cfg-inp mono"
+          type="password"
+          id="c-token"
+          placeholder="secret_xxxxxxxxxxxxxxxxxxx"
+        />
+      </div>
+      <div class="cfg-row">
+        <div class="cfg-lbl">Database ID (Activity Log)</div>
+        <input
+          class="cfg-inp mono"
+          type="text"
+          id="c-db"
+          placeholder="32 ký tự từ URL Notion"
+        />
+      </div>
+
+      <div class="cfg-section">Tên properties trong database</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+        <div class="cfg-row">
+          <div class="cfg-lbl">Ngày (Date)</div>
+          <input class="cfg-inp" type="text" id="c-date" value="Date" />
+        </div>
+        <div class="cfg-row">
+          <div class="cfg-lbl">Loại (Type)</div>
+          <input class="cfg-inp" type="text" id="c-type" value="Type" />
+        </div>
+        <div class="cfg-row">
+          <div class="cfg-lbl">Trạng thái</div>
+          <input class="cfg-inp" type="text" id="c-status" value="Status" />
+        </div>
+        <div class="cfg-row">
+          <div class="cfg-lbl">Giá trị "Done"</div>
+          <input class="cfg-inp" type="text" id="c-done" value="Done" />
+        </div>
+      </div>
+
+      <div class="cfg-actions">
+        <button class="btn btn-primary" style="flex: 1" onclick="saveConnect()">
+          Kết nối & Tải dữ liệu
+        </button>
+        <button class="btn" onclick="runDemo()">Demo</button>
+      </div>
+      <div class="cfg-note">
+        Token & DB ID được lưu trong <strong>localStorage</strong> của trình
+        duyệt — không gửi đến bất kỳ server nào ngoài Notion. Dữ liệu tự làm mới
+        mỗi <strong>5 phút</strong>.
+      </div>
+    </div>
+
+    <script>
+      // ═══════════════════════════════════════════════
+      // CONSTANTS
+      // ═══════════════════════════════════════════════
+      const TYPES = [
+        {
+          id: "Productive",
+          color: "#378ADD",
+          ramp: ["#E6F1FB", "#B5D4F4", "#378ADD", "#185FA5", "#042C53"],
+          dark: "#0C447C",
+          light: "#E6F1FB",
+        },
+        {
+          id: "Mindset",
+          color: "#7F77DD",
+          ramp: ["#EEEDFE", "#CECBF6", "#7F77DD", "#534AB7", "#26215C"],
+          dark: "#3C3489",
+          light: "#EEEDFE",
+        },
+        {
+          id: "Exercise",
+          color: "#D85A30",
+          ramp: ["#FAECE7", "#F5C4B3", "#D85A30", "#993C1D", "#4A1B0C"],
+          dark: "#993C1D",
+          light: "#FAECE7",
+        },
+        {
+          id: "Learning",
+          color: "#EF9F27",
+          ramp: ["#FAEEDA", "#FAC775", "#EF9F27", "#BA7517", "#412402"],
+          dark: "#633806",
+          light: "#FAEEDA",
+        },
+      ];
+      const OVERALL_RAMP = [
+        "var(--bg3)",
+        "#9FE1CB",
+        "#5DCAA5",
+        "#1D9E75",
+        "#085041",
+      ];
+      const MO_VI = [
+        "Tháng 1",
+        "Tháng 2",
+        "Tháng 3",
+        "Tháng 4",
+        "Tháng 5",
+        "Tháng 6",
+        "Tháng 7",
+        "Tháng 8",
+        "Tháng 9",
+        "Tháng 10",
+        "Tháng 11",
+        "Tháng 12",
+      ];
+      const MO_EN = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+
+      // ═══════════════════════════════════════════════
+      // STATE
+      // ═══════════════════════════════════════════════
+      let S = {
+        entries: [], // [{date, type, status, done}]
+        year: new Date().getFullYear(),
+        selMonth: null,
+        cfg: {},
+        isDemo: false,
+        refreshTimer: null,
+        countdownTimer: null,
+        nextRefresh: null,
+      };
+
+      // ═══════════════════════════════════════════════
+      // INIT
+      // ═══════════════════════════════════════════════
+      (function init() {
+        loadCfg();
+        buildYearTabs();
+        buildMainLegend();
+        if (S.cfg.token && S.cfg.dbId) {
+          fetchNotion();
+        } else {
+          runDemo();
+        }
+        startAutoRefresh();
+      })();
+
+      // ═══════════════════════════════════════════════
+      // CONFIG
+      // ═══════════════════════════════════════════════
+      function loadCfg() {
+        try {
+          const c = JSON.parse(localStorage.getItem("lp_hm_cfg") || "{}");
+          S.cfg = c;
+          if (c.token) document.getElementById("c-token").value = c.token;
+          if (c.dbId) document.getElementById("c-db").value = c.dbId;
+          if (c.date) document.getElementById("c-date").value = c.date;
+          if (c.type) document.getElementById("c-type").value = c.type;
+          if (c.status) document.getElementById("c-status").value = c.status;
+          if (c.done) document.getElementById("c-done").value = c.done;
+        } catch (e) {}
+      }
+
+      function getCfgFromForm() {
+        return {
+          token: document.getElementById("c-token").value.trim(),
+          dbId: document.getElementById("c-db").value.trim().replace(/-/g, ""),
+          date: document.getElementById("c-date").value.trim() || "Date",
+          type: document.getElementById("c-type").value.trim() || "Type",
+          status: document.getElementById("c-status").value.trim() || "Status",
+          done: document.getElementById("c-done").value.trim() || "Done",
+        };
+      }
+
+      function saveConnect() {
+        const c = getCfgFromForm();
+        localStorage.setItem("lp_hm_cfg", JSON.stringify(c));
+        S.cfg = c;
+        toggleCfg();
+        if (c.token && c.dbId) fetchNotion();
+      }
+
+      function toggleCfg() {
+        document.getElementById("cfg-panel").classList.toggle("show");
+      }
+      function showGuide() {
+        document.getElementById("guide-banner").classList.add("show");
+      }
+
+      // ═══════════════════════════════════════════════
+      // NOTION API
+      // ═══════════════════════════════════════════════
+      async function fetchNotion() {
+        setStatus("loading", "Đang đồng bộ dữ liệu từ Vercel...");
+        try {
+          const res = await fetch("/api/notion");
+          if (!res.ok) {
+            const t = await res.text();
+            throw new Error(`HTTP ${res.status}: ${t.slice(0, 120)}`);
+          }
+
+          const json = await res.json();
+          S.entries = json.entries || [];
+          S.isDemo = false;
+
+          const now = new Date().toLocaleTimeString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+
+          setStatus(
+            "ok",
+            `Đồng bộ thành công — ${S.entries.length} bản ghi — ${now}`
+          );
+          document.getElementById(
+            "last-sync"
+          ).textContent = `Cập nhật lúc ${now} · tự làm mới sau 5 phút`;
+          render();
+        } catch (err) {
+          setStatus("err", `Lỗi: ${err.message}`);
+        }
+      }
+
+      // ═══════════════════════════════════════════════
+      // DEMO DATA
+      // ═══════════════════════════════════════════════
+      function runDemo() {
+        S.isDemo = true;
+        const now = new Date();
+        const entries = [];
+        const types = TYPES.map((t) => t.id);
+
+        for (let i = 0; i < 730; i++) {
+          const d = new Date(now);
+          d.setDate(d.getDate() - i);
+          const active = i < 14 ? Math.random() < 0.85 : Math.random() < 0.62;
+          if (!active) continue;
+          const n = Math.floor(Math.random() * 3) + 1;
+          [...types]
+            .sort(() => Math.random() - 0.5)
+            .slice(0, n)
+            .forEach((type) => {
+              entries.push({
+                date: d.toISOString().substring(0, 10),
+                type,
+                status: "Done",
+                done: true,
+              });
+            });
+        }
+        // Add some "in progress"
+        for (let i = 0; i < 80; i++) {
+          const d = new Date(now);
+          d.setDate(d.getDate() - Math.floor(Math.random() * 180));
+          entries.push({
+            date: d.toISOString().substring(0, 10),
+            type: TYPES[Math.floor(Math.random() * 4)].id,
+            status: "In Progress",
+            done: false,
+          });
+        }
+
+        S.entries = entries;
+        setStatus(
+          "ok",
+          `Chế độ Demo — ${entries.length} bản ghi mẫu · nhấn ⚙️ để kết nối Notion thật`
+        );
+        document.getElementById("last-sync").textContent =
+          "Demo mode — nhấn ⚙️ để kết nối Notion";
+        render();
+      }
+
+      function refresh() {
+        if (S.cfg.token && S.cfg.dbId) fetchNotion();
+        else runDemo();
+      }
+
+      // ═══════════════════════════════════════════════
+      // AUTO REFRESH
+      // ═══════════════════════════════════════════════
+      function startAutoRefresh() {
+        clearInterval(S.refreshTimer);
+        clearInterval(S.countdownTimer);
+        const INTERVAL = 5 * 60 * 1000;
+        S.nextRefresh = Date.now() + INTERVAL;
+        S.refreshTimer = setInterval(() => {
+          if (!S.isDemo && S.cfg.token && S.cfg.dbId) fetchNotion();
+          S.nextRefresh = Date.now() + INTERVAL;
+        }, INTERVAL);
+        S.countdownTimer = setInterval(updateCountdown, 10000);
+      }
+
+      function updateCountdown() {
+        if (S.isDemo) return;
+        const left = Math.max(
+          0,
+          Math.round((S.nextRefresh - Date.now()) / 60000)
+        );
+        const el = document.getElementById("next-refresh");
+        if (el) el.textContent = left > 0 ? `Làm mới sau ${left} phút` : "";
+      }
+
+      // ═══════════════════════════════════════════════
+      // STATUS
+      // ═══════════════════════════════════════════════
+      function setStatus(type, msg) {
+        document.getElementById("sdot").className = "sdot " + type;
+        document.getElementById("stext").textContent = msg;
+      }
+
+      // ═══════════════════════════════════════════════
+      // RENDER ALL
+      // ═══════════════════════════════════════════════
+      function render() {
+        const stats = calcStats();
+        renderStats(stats);
+        renderMainHM(S.year);
+        renderTypeHMs();
+        renderStreak(stats);
+        renderMonthGrid(S.year);
+        if (S.selMonth !== null) renderMonthDetail(S.selMonth, S.year);
+      }
+
+      // ═══════════════════════════════════════════════
+      // CALCULATIONS
+      // ═══════════════════════════════════════════════
+      function calcStats() {
+        const done = S.entries.filter((e) => e.done);
+        const doneSet = new Set(done.map((e) => e.date));
+        const doneDates = [...doneSet].sort();
+        const yearStr = S.year.toString();
+        const yearDays = new Set(
+          done.filter((e) => e.date.startsWith(yearStr)).map((e) => e.date)
+        ).size;
+
+        // Streak
+        const today = new Date();
+        let cur = 0;
+        for (let i = 0; i < 365; i++) {
+          const d = new Date(today);
+          d.setDate(d.getDate() - i);
+          if (doneSet.has(d.toISOString().substring(0, 10))) cur++;
+          else break;
+        }
+        let best = 0,
+          tmp = 0,
+          prev = null;
+        doneDates.forEach((ds) => {
+          if (prev) {
+            const diff = (new Date(ds) - new Date(prev)) / 86400000;
+            tmp = diff === 1 ? tmp + 1 : 1;
+          } else tmp = 1;
+          best = Math.max(best, tmp);
+          prev = ds;
+        });
+
+        const moStr = today.toISOString().substring(0, 7);
+        const monthDays = new Set(
+          done.filter((e) => e.date.startsWith(moStr)).map((e) => e.date)
+        ).size;
+
+        const total = S.entries.length;
+        const doneN = done.length;
+        const rate = total > 0 ? Math.round((doneN / total) * 100) : 0;
+
+        const typeStats = {};
+        TYPES.forEach((t) => {
+          const te = S.entries.filter((e) => e.type === t.id);
+          const td = te.filter((e) => e.done).length;
+          typeStats[t.id] = {
+            total: te.length,
+            done: td,
+            rate: te.length > 0 ? Math.round((td / te.length) * 100) : 0,
+          };
+        });
+
+        return {
+          yearDays,
+          cur,
+          best,
+          monthDays,
+          total: doneN,
+          rate,
+          typeStats,
+        };
+      }
+
+      function renderStats(st) {
+        const yr = S.year.toString();
+        document.getElementById("s-days").textContent = st.yearDays;
+        document.getElementById("s-days-sub").textContent = `năm ${yr}`;
+        document.getElementById("s-streak").textContent = st.cur;
+        document.getElementById("s-best").textContent = st.best;
+        document.getElementById("s-rate").textContent = st.rate + "%";
+        document.getElementById(
+          "s-rate-sub"
+        ).textContent = `${st.total} tasks hoàn thành`;
+      }
+
+      // ═══════════════════════════════════════════════
+      // YEAR TABS
+      // ═══════════════════════════════════════════════
+      function buildYearTabs() {
+        const cur = new Date().getFullYear();
+        const years = [cur - 2, cur - 1, cur];
+        const el = document.getElementById("ytabs");
+        el.innerHTML = "";
+        years.forEach((y) => {
+          const b = document.createElement("button");
+          b.className = "ytab" + (y === S.year ? " active" : "");
+          b.textContent = y;
+          b.onclick = () => {
+            S.year = y;
+            S.selMonth = null;
+            document
+              .querySelectorAll(".ytab")
+              .forEach((x) => x.classList.remove("active"));
+            b.classList.add("active");
+            renderMainHM(y);
+            renderMonthGrid(y);
+            document.getElementById("mdetail").classList.remove("show");
+          };
+          el.appendChild(b);
+        });
+      }
+
+      // ═══════════════════════════════════════════════
+      // LAYER 1: MAIN HEATMAP
+      // ═══════════════════════════════════════════════
+      function buildMainLegend() {
+        const el = document.getElementById("main-leg");
+        el.innerHTML = "";
+        OVERALL_RAMP.forEach((c) => {
+          const d = document.createElement("div");
+          d.className = "lcell";
+          d.style.background = c;
+          el.appendChild(d);
+        });
+      }
+
+      function getDayMap(year) {
+        const map = {};
+        S.entries
+          .filter((e) => e.done && e.date?.startsWith(year.toString()))
+          .forEach((e) => {
+            map[e.date] = (map[e.date] || 0) + 1;
+          });
+        return map;
+      }
+
+      function overallColor(n) {
+        return OVERALL_RAMP[Math.min(n, 4)];
+      }
+
+      function renderMainHM(year) {
+        const grid = document.getElementById("main-hm");
+        const mrow = document.getElementById("mrow");
+        grid.innerHTML = "";
+        mrow.innerHTML = "";
+        const map = getDayMap(year);
+        const isLeap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+        const totalDays = isLeap ? 366 : 365;
+        const start = new Date(year, 0, 1);
+        const startDow = (start.getDay() + 6) % 7; // Mon=0
+        const totalCols = Math.ceil((totalDays + startDow) / 7);
+        const monthColStart = {};
+        let total = 0,
+          activeDays = 0;
+
+        for (let col = 0; col < totalCols; col++) {
+          const wk = document.createElement("div");
+          wk.className = "hm-week";
+          for (let row = 0; row < 7; row++) {
+            const idx = col * 7 + row - startDow;
+            const cell = document.createElement("div");
+            cell.className = "hm-cell";
+            if (idx < 0 || idx >= totalDays) {
+              cell.style.visibility = "hidden";
+              cell.style.background = "var(--bg3)";
+            } else {
+              const d = new Date(year, 0, idx + 1);
+              const ds = d.toISOString().substring(0, 10);
+              const n = map[ds] || 0;
+              cell.style.background = n === 0 ? "var(--bg3)" : overallColor(n);
+              if (n > 0) {
+                total += n;
+                activeDays++;
+              }
+              if (d.getDate() === 1) monthColStart[d.getMonth()] = col;
+              const label = d.toLocaleDateString("vi-VN", {
+                weekday: "short",
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              });
+              tip(
+                cell,
+                `${label}: ${n === 0 ? "Không có hoạt động" : n + " hoạt động"}`
+              );
+            }
+            wk.appendChild(cell);
+          }
+          grid.appendChild(wk);
+        }
+
+        // Month labels
+        const cellW = 16; // cell 13px + gap 3px
+        let prevCol = 0;
+        MO_EN.forEach((m, i) => {
+          const col = monthColStart[i] ?? prevCol;
+          const lbl = document.createElement("div");
+          lbl.className = "hm-ml";
+          lbl.textContent = m;
+          lbl.style.width = (col - prevCol) * cellW + "px";
+          lbl.style.minWidth = "0";
+          mrow.appendChild(lbl);
+          prevCol = col;
+        });
+
+        document.getElementById(
+          "year-meta"
+        ).textContent = `${activeDays} ngày hoạt động · ${total} tasks hoàn thành năm ${year}`;
+      }
+
+      // ═══════════════════════════════════════════════
+      // LAYER 2: TYPE HEATMAPS
+      // ═══════════════════════════════════════════════
+      function renderTypeHMs() {
+        const grid = document.getElementById("tgrid");
+        grid.innerHTML = "";
+        const WEEKS = 26;
+        const now = new Date();
+
+        TYPES.forEach((type) => {
+          const map = {};
+          S.entries
+            .filter((e) => e.done && e.type === type.id)
+            .forEach((e) => {
+              map[e.date] = (map[e.date] || 0) + 1;
+            });
+          const total = Object.values(map).reduce((a, b) => a + b, 0);
+          const days = Object.keys(map).length;
+
+          // Streak for this type
+          let tStreak = 0;
+          for (let i = 0; i < 365; i++) {
+            const d = new Date(now);
+            d.setDate(d.getDate() - i);
+            if (map[d.toISOString().substring(0, 10)]) tStreak++;
+            else break;
+          }
+
+          const card = document.createElement("div");
+          card.className = "tcard";
+          card.innerHTML = `
+      <div class="thead">
+        <div class="tdot" style="background:${type.color}"></div>
+        <div class="tname">${type.id}</div>
+        <div class="tcnt">${days} ngày · ${total} tasks</div>
+      </div>
+      <div class="thm" id="thm-${type.id}"></div>
+      <div class="tfoot">
+        <span class="tstreak">26 tuần gần nhất</span>
+        <span style="flex:1"></span>
+        ${
+          tStreak > 0
+            ? `<span class="tbadge" style="background:${type.light};color:${type.dark}">🔥 ${tStreak} ngày streak</span>`
+            : ""
+        }
+      </div>`;
+          grid.appendChild(card);
+
+          const hmEl = document.getElementById(`thm-${type.id}`);
+          // Start Monday of 26 weeks ago
+          const anchor = new Date(now);
+          anchor.setDate(
+            anchor.getDate() - WEEKS * 7 - ((anchor.getDay() + 6) % 7)
+          );
+
+          for (let col = 0; col < WEEKS; col++) {
+            const wk = document.createElement("div");
+            wk.className = "twk";
+            for (let row = 0; row < 7; row++) {
+              const d = new Date(anchor);
+              d.setDate(d.getDate() + col * 7 + row);
+              if (d > now) break;
+              const ds = d.toISOString().substring(0, 10);
+              const n = map[ds] || 0;
+              const cell = document.createElement("div");
+              cell.className = "tcell";
+              cell.style.background =
+                n === 0 ? "var(--bg3)" : type.ramp[Math.min(n, 4)];
+              const label = d.toLocaleDateString("vi-VN", {
+                day: "2-digit",
+                month: "2-digit",
+              });
+              tip(
+                cell,
+                `${label}: ${n === 0 ? "Không có" : n + " " + type.id}`
+              );
+              wk.appendChild(cell);
+            }
+            hmEl.appendChild(wk);
+          }
+        });
+      }
+
+      // ═══════════════════════════════════════════════
+      // LAYER 3: STREAK
+      // ═══════════════════════════════════════════════
+      function renderStreak(stats) {
+        document.getElementById("sk-cur").textContent = stats.cur;
+        document.getElementById("sk-best").textContent = stats.best;
+        document.getElementById("sk-month").textContent = stats.monthDays;
+        document.getElementById("sk-total").textContent = stats.total;
+
+        const right = document.getElementById("sk-right");
+        let html =
+          '<div class="bar-section-title">Tỉ lệ hoàn thành theo loại</div>';
+        TYPES.forEach((t) => {
+          const s = stats.typeStats[t.id] || { rate: 0, done: 0, total: 0 };
+          html += `<div class="bar-row">
+      <div class="bar-name">
+        <div style="width:8px;height:8px;border-radius:50%;background:${t.color};flex-shrink:0"></div>
+        ${t.id}
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${s.rate}%;background:${t.color}"></div>
+      </div>
+      <div class="bar-pct">${s.rate}%</div>
+    </div>`;
+        });
+        html += `<div class="sk-pills">`;
+        TYPES.forEach((t) => {
+          const s = stats.typeStats[t.id] || { total: 0, done: 0 };
+          html += `<div class="pill">
+      <div class="pill-dot" style="background:${t.color}"></div>
+      <span style="font-size:11px;color:var(--text2)">${t.id} <strong>${s.done}</strong>/${s.total}</span>
+    </div>`;
+        });
+        html += "</div>";
+        right.innerHTML = html;
+      }
+
+      // ═══════════════════════════════════════════════
+      // LAYER 4: MONTHLY
+      // ═══════════════════════════════════════════════
+      function renderMonthGrid(year) {
+        const grid = document.getElementById("mgrid");
+        grid.innerHTML = "";
+        const yrStr = year.toString();
+        const map = {};
+        S.entries
+          .filter((e) => e.done && e.date?.startsWith(yrStr))
+          .forEach((e) => {
+            map[e.date] = (map[e.date] || 0) + 1;
+          });
+
+        for (let mo = 0; mo < 12; mo++) {
+          const days = new Date(year, mo + 1, 0).getDate();
+          let acts = 0,
+            active = 0,
+            counts = [];
+          for (let d = 1; d <= days; d++) {
+            const ds = `${year}-${String(mo + 1).padStart(2, "0")}-${String(
+              d
+            ).padStart(2, "0")}`;
+            const n = map[ds] || 0;
+            counts.push(n);
+            if (n > 0) {
+              active++;
+              acts += n;
+            }
+          }
+          const maxN = Math.max(...counts, 1);
+
+          let mini = "";
+          counts.forEach((n) => {
+            const alpha = n === 0 ? 0 : 0.25 + 0.75 * (n / maxN);
+            mini += `<div class="mini-cell" style="background:${
+              n === 0 ? "var(--bg3)" : "#1D9E75"
+            };opacity:${n === 0 ? 1 : alpha}"></div>`;
+          });
+
+          const card = document.createElement("div");
+          card.className = "mcard" + (S.selMonth === mo ? " sel" : "");
+          card.innerHTML = `
+      <div class="mcard-name">${MO_VI[mo]}</div>
+      <div class="mini-hm">${mini}</div>
+      <div class="mcard-stat">${active}/${days} ngày · ${acts} tasks</div>`;
+          card.onclick = () => selectMonth(mo, year, map);
+          grid.appendChild(card);
+        }
+      }
+
+      function selectMonth(mo, year, map) {
+        S.selMonth = S.selMonth === mo ? null : mo;
+        document
+          .querySelectorAll(".mcard")
+          .forEach((c, i) => c.classList.toggle("sel", i === S.selMonth));
+        const det = document.getElementById("mdetail");
+        if (S.selMonth === null) {
+          det.classList.remove("show");
+          return;
+        }
+        det.classList.add("show");
+        renderMonthDetail(mo, year, map);
+        det.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      function renderMonthDetail(mo, year, dayMap) {
+        if (!dayMap) {
+          dayMap = {};
+          const yrStr = year.toString();
+          S.entries
+            .filter((e) => e.done && e.date?.startsWith(yrStr))
+            .forEach((e) => {
+              dayMap[e.date] = (dayMap[e.date] || 0) + 1;
+            });
+        }
+        // Full entries for this month
+        const moStr = `${year}-${String(mo + 1).padStart(2, "0")}`;
+        const typeEntries = {};
+        S.entries
+          .filter((e) => e.done && e.date?.startsWith(moStr))
+          .forEach((e) => {
+            if (!typeEntries[e.date]) typeEntries[e.date] = [];
+            typeEntries[e.date].push(e);
+          });
+
+        const days = new Date(year, mo + 1, 0).getDate();
+        let totalActs = 0;
+        for (let d = 1; d <= days; d++) {
+          const ds = `${moStr}-${String(d).padStart(2, "0")}`;
+          totalActs += (typeEntries[ds] || []).length;
+        }
+        document.getElementById(
+          "mdetail-title"
+        ).textContent = `${MO_VI[mo]} ${year}`;
+        document.getElementById(
+          "mdetail-meta"
+        ).textContent = `${totalActs} hoạt động hoàn thành`;
+
+        const calEl = document.getElementById("mcal");
+        calEl.innerHTML = "";
+        ["T2", "T3", "T4", "T5", "T6", "T7", "CN"].forEach((n) => {
+          const h = document.createElement("div");
+          h.className = "cday-hd";
+          h.textContent = n;
+          calEl.appendChild(h);
+        });
+
+        const firstDow = (new Date(year, mo, 1).getDay() + 6) % 7;
+        for (let i = 0; i < firstDow; i++) {
+          const e = document.createElement("div");
+          e.className = "cempty";
+          calEl.appendChild(e);
+        }
+
+        const todayStr = new Date().toISOString().substring(0, 10);
+
+        for (let d = 1; d <= days; d++) {
+          const ds = `${moStr}-${String(d).padStart(2, "0")}`;
+          const acts = typeEntries[ds] || [];
+          const cell = document.createElement("div");
+          cell.className =
+            "cday" +
+            (acts.length > 0 ? " has-act" : "") +
+            (ds === todayStr ? " today" : "");
+          let html = `<div class="cday-num">${d}</div>`;
+          acts.slice(0, 3).forEach((a) => {
+            const t = TYPES.find((x) => x.id === a.type) || TYPES[0];
+            html += `<div class="cday-tag" style="background:${t.light};color:${t.dark}">${t.id}</div>`;
+          });
+          if (acts.length > 3)
+            html += `<div class="cday-more">+${acts.length - 3} nữa</div>`;
+          cell.innerHTML = html;
+          calEl.appendChild(cell);
+        }
+      }
+
+      function closeDetail() {
+        S.selMonth = null;
+        document.getElementById("mdetail").classList.remove("show");
+        document
+          .querySelectorAll(".mcard")
+          .forEach((c) => c.classList.remove("sel"));
+      }
+
+      // ═══════════════════════════════════════════════
+      // TOOLTIP
+      // ═══════════════════════════════════════════════
+      const tipEl = document.getElementById("tip");
+      function tip(el, text) {
+        el.addEventListener("mouseenter", () => {
+          tipEl.textContent = text;
+          tipEl.style.display = "block";
+        });
+        el.addEventListener("mousemove", (e) => {
+          tipEl.style.left = e.clientX + 12 + "px";
+          tipEl.style.top = e.clientY - 32 + "px";
+        });
+        el.addEventListener("mouseleave", () => {
+          tipEl.style.display = "none";
+        });
+      }
+    </script>
+  </body>
+</html>
