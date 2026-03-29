@@ -1634,10 +1634,13 @@
         const WEEKS = 26;
         const now = new Date();
 
-        // Đầu tuần của mốc 26 tuần trước
-        const start = new Date(now);
-        start.setDate(start.getDate() - WEEKS * 7);
-        start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+        // 👉 Lấy đầu tuần hiện tại (Monday)
+        const currentWeekStart = new Date(now);
+        currentWeekStart.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+
+        // 👉 Lùi về đủ 26 tuần (bao gồm tuần hiện tại)
+        const start = new Date(currentWeekStart);
+        start.setDate(start.getDate() - (WEEKS - 1) * 7);
 
         TYPES.forEach((type) => {
           const map = {};
@@ -1691,7 +1694,13 @@
               const d = new Date(start);
               d.setDate(d.getDate() + col * 7 + row);
 
-              if (d > now) break;
+              if (d > now) {
+                const cell = document.createElement("div");
+                cell.className = "tcell";
+                cell.style.background = "transparent";
+                wk.appendChild(cell);
+                continue;
+              }
 
               const ds = ymdLocal(d);
               const n = map[ds] || 0;
