@@ -1138,6 +1138,10 @@
     </div>
 
     <script>
+      // Helper: lấy YYYY-MM-DD theo giờ địa phương (tránh lỗi UTC)
+      function localDate(d) {
+        return (d || new Date()).toLocaleDateString("en-CA");
+      }
       // ═══════════════════════════════════════════════
       // CONSTANTS
       // ═══════════════════════════════════════════════
@@ -1430,7 +1434,7 @@
         for (let i = 0; i < 365; i++) {
           const d = new Date(today);
           d.setDate(d.getDate() - i);
-          if (doneSet.has(d.toISOString().substring(0, 10))) cur++;
+          if (doneSet.has(d.toLocaleDateString("en-CA"))) cur++;
           else break;
         }
         let best = 0,
@@ -1445,7 +1449,7 @@
           prev = ds;
         });
 
-        const moStr = today.toISOString().substring(0, 7);
+        const moStr = today.toLocaleDateString("en-CA").substring(0, 7);
         const monthDays = new Set(
           done.filter((e) => e.date.startsWith(moStr)).map((e) => e.date)
         ).size;
@@ -1570,7 +1574,7 @@
               cell.style.background = "var(--bg3)";
             } else {
               const d = new Date(year, 0, idx + 1);
-              const ds = d.toISOString().substring(0, 10);
+              const ds = d.toLocaleDateString("en-CA");
               const n = map[ds] || 0;
               cell.style.background = n === 0 ? "var(--bg3)" : overallColor(n);
               if (n > 0) {
@@ -1637,7 +1641,8 @@
           for (let i = 0; i < 365; i++) {
             const d = new Date(now);
             d.setDate(d.getDate() - i);
-            if (map[d.toISOString().substring(0, 10)]) tStreak++;
+            const ds = d.toLocaleDateString("en-CA");
+            if (map[ds]) tStreak++;
             else break;
           }
 
@@ -1848,7 +1853,7 @@
           calEl.appendChild(e);
         }
 
-        const todayStr = new Date().toISOString().substring(0, 10);
+        const todayStr = new Date().toLocaleDateString("en-CA");
 
         for (let d = 1; d <= days; d++) {
           const ds = `${moStr}-${String(d).padStart(2, "0")}`;
