@@ -1139,8 +1139,10 @@
 
     <script>
       // Helper: lấy YYYY-MM-DD theo giờ địa phương (tránh lỗi UTC)
-      function localDate(d) {
-        return (d || new Date()).toLocaleDateString("en-CA");
+      function ymdLocal(date = new Date()) {
+        const d = new Date(date);
+        const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+        return local.toISOString().slice(0, 10); // YYYY-MM-DD
       }
       // ═══════════════════════════════════════════════
       // CONSTANTS
