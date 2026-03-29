@@ -1142,7 +1142,13 @@
       function ymdLocal(date = new Date()) {
         const d = new Date(date);
         const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-        return local.toISOString().slice(0, 10); // YYYY-MM-DD
+        return local.toISOString().slice(0, 10);
+      }
+
+      function norm(v) {
+        return String(v || "")
+          .trim()
+          .toLowerCase();
       }
       // ═══════════════════════════════════════════════
       // CONSTANTS
@@ -1631,7 +1637,7 @@
         TYPES.forEach((type) => {
           const map = {};
           S.entries
-            .filter((e) => e.done && e.type === type.id)
+            .filter((e) => e.done && norm(e.type) === norm(type.id))
             .forEach((e) => {
               map[e.date] = (map[e.date] || 0) + 1;
             });

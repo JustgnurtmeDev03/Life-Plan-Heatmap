@@ -76,8 +76,8 @@ export default async function handler(req, res) {
 
         return {
           date: localDate,
-          type,
-          status,
+          type: String(type).trim(),
+          status: String(status).trim(),
           done: ["done", "completed", "hoàn thành"].includes(normalizedStatus),
         };
       })
