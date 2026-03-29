@@ -54,27 +54,36 @@ export default async function handler(req, res) {
     const entries = allResults
       .map((page) => {
         const props = page.properties || {};
+
         const dateP = props[dateProp] || {};
         const typeP = props[typeProp] || {};
         const statusP = props[statusProp] || {};
 
-        const status = statusP?.select?.name || statusP?.status?.name || "";
+        // 📅 Lấy date chuẩn local (fix lệch timezone)
+        const rawDate = dateP?.date?.start;
+        if (!rawDate) return null;
 
-        const normalizedStatus = status?.toLowerCase().trim();
+        const d = new Date(rawDate);
+        const localDate = d.toLocaleDateString("en-CA"); // YYYY-MM-DD
 
+        // 🏷️ Lấy type
         const type =
           typeP?.select?.name || typeP?.multi_select?.[0]?.name || "Other";
 
-        const date = dateP?.date?.start || "";
+        // 📊 Lấy status (property type = status)
+        const status = statusP?.status?.name || statusP?.select?.name || "";
+
+        // 🔥 Normalize để tránh sai "Done" vs "done"
+        const normalizedStatus = status.toLowerCase().trim();
 
         return {
-          date: date.slice(0, 10),
+          date: localDate,
           type,
           status,
           done: ["done", "completed"].includes(normalizedStatus),
         };
       })
-      .filter((e) => e.date);
+      .filter(Boolean);
 
     return res.status(200).json({ entries });
   } catch (err) {
