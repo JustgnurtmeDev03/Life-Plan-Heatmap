@@ -1680,7 +1680,7 @@
               const d = new Date(anchor);
               d.setDate(d.getDate() + col * 7 + row);
               if (d > now) break;
-              const ds = d.toISOString().substring(0, 10);
+              const ds = d.toLocaleDateString("en-CA");
               const n = map[ds] || 0;
               const cell = document.createElement("div");
               cell.className = "tcell";
