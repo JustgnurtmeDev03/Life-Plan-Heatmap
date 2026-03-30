@@ -482,11 +482,12 @@
       .bar-name {
         font-size: 12px;
         color: var(--text2);
-        width: 82px;
+        width: 85px;
         flex-shrink: 0;
         display: flex;
         align-items: center;
         gap: 5px;
+        text-wrap: nowrap;
       }
       .bar-track {
         flex: 1;
@@ -1148,6 +1149,7 @@
           ramp: ["#E6F1FB", "#B5D4F4", "#378ADD", "#185FA5", "#042C53"],
           dark: "#0C447C",
           light: "#E6F1FB",
+          icon: "⚡",
         },
         {
           id: "Mindset",
@@ -1155,6 +1157,7 @@
           ramp: ["#EEEDFE", "#CECBF6", "#7F77DD", "#534AB7", "#26215C"],
           dark: "#3C3489",
           light: "#EEEDFE",
+          icon: "🧠",
         },
         {
           id: "Exercise",
@@ -1162,6 +1165,7 @@
           ramp: ["#FAECE7", "#F5C4B3", "#D85A30", "#993C1D", "#4A1B0C"],
           dark: "#993C1D",
           light: "#FAECE7",
+          icon: "🏃",
         },
         {
           id: "Learning",
@@ -1169,6 +1173,31 @@
           ramp: ["#FAEEDA", "#FAC775", "#EF9F27", "#BA7517", "#412402"],
           dark: "#633806",
           light: "#FAEEDA",
+          icon: "📚",
+        },
+        {
+          id: "Life",
+          color: "#2FBF71",
+          ramp: ["#E5F8EE", "#B8EBCD", "#2FBF71", "#1E8C52", "#0D4A2B"],
+          dark: "#0D4A2B",
+          light: "#E5F8EE",
+          icon: "🌿",
+        },
+        {
+          id: "Planning",
+          color: "#6C8CFF",
+          ramp: ["#E9EEFF", "#C8D4FF", "#6C8CFF", "#4665D9", "#21348C"],
+          dark: "#21348C",
+          light: "#E9EEFF",
+          icon: "🗂️",
+        },
+        {
+          id: "Creative",
+          color: "#C65BFF",
+          ramp: ["#F5E8FF", "#E0BCFF", "#C65BFF", "#9A32D6", "#55117A"],
+          dark: "#55117A",
+          light: "#F5E8FF",
+          icon: "🎨",
         },
       ];
       const OVERALL_RAMP = [
@@ -1663,7 +1692,7 @@
           card.innerHTML = `
       <div class="thead">
         <div class="tdot" style="background:${type.color}"></div>
-        <div class="tname">${type.id}</div>
+        <div class="tname">${type.icon || ""} ${type.id}</div>
         <div class="tcnt">${days} ngày · ${total} tasks</div>
       </div>
       <div class="thm" id="thm-${type.id}"></div>
@@ -1739,11 +1768,15 @@
           const s = stats.typeStats[t.id] || { rate: 0, done: 0, total: 0 };
           html += `<div class="bar-row">
       <div class="bar-name">
-        <div style="width:8px;height:8px;border-radius:50%;background:${t.color};flex-shrink:0"></div>
-        ${t.id}
+        <div style="width:8px;height:8px;border-radius:50%;background:${
+          t.color
+        };flex-shrink:0"></div>
+        ${t.icon || ""} ${t.id}
       </div>
       <div class="bar-track">
-        <div class="bar-fill" style="width:${s.rate}%;background:${t.color}"></div>
+        <div class="bar-fill" style="width:${s.rate}%;background:${
+            t.color
+          }"></div>
       </div>
       <div class="bar-pct">${s.rate}%</div>
     </div>`;
@@ -1753,7 +1786,9 @@
           const s = stats.typeStats[t.id] || { total: 0, done: 0 };
           html += `<div class="pill">
       <div class="pill-dot" style="background:${t.color}"></div>
-      <span style="font-size:11px;color:var(--text2)">${t.id} <strong>${s.done}</strong>/${s.total}</span>
+      <span style="font-size:11px;color:var(--text2)">${t.icon || ""} ${
+            t.id
+          } <strong>${s.done}</strong>/${s.total}
     </div>`;
         });
         html += "</div>";
