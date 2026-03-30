@@ -1228,11 +1228,7 @@
         loadCfg();
         buildYearTabs();
         buildMainLegend();
-        if (S.cfg.token && S.cfg.dbId) {
-          fetchNotion();
-        } else {
-          runDemo();
-        }
+        fetchNotion();
         startAutoRefresh();
       })();
 
@@ -1305,10 +1301,11 @@
           );
           document.getElementById(
             "last-sync"
-          ).textContent = `Cập nhật lúc ${now} · tự làm mới sau 5 phút`;
+          ).textContent = `Cập nhật lúc ${now} · dữ liệu từ Activity Log`;
           render();
         } catch (err) {
           setStatus("err", `Lỗi: ${err.message}`);
+          runDemo();
         }
       }
 
@@ -1362,8 +1359,7 @@
       }
 
       function refresh() {
-        if (S.cfg.token && S.cfg.dbId) fetchNotion();
-        else runDemo();
+        fetchNotion();
       }
 
       // ═══════════════════════════════════════════════
@@ -1375,7 +1371,7 @@
         const INTERVAL = 5 * 60 * 1000;
         S.nextRefresh = Date.now() + INTERVAL;
         S.refreshTimer = setInterval(() => {
-          if (!S.isDemo && S.cfg.token && S.cfg.dbId) fetchNotion();
+          if (!S.isDemo) fetchNotion();
           S.nextRefresh = Date.now() + INTERVAL;
         }, INTERVAL);
         S.countdownTimer = setInterval(updateCountdown, 10000);

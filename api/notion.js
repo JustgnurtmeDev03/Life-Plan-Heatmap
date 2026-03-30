@@ -6,10 +6,10 @@ export default async function handler(req, res) {
 
     const token = process.env.NOTION_TOKEN;
     const dbId = (process.env.NOTION_DB_ID || "").replace(/-/g, "");
-    const dateProp = process.env.NOTION_DATE_PROP || "Date";
+    const dateProp = process.env.NOTION_DATE_PROP || "Completed At";
     const typeProp = process.env.NOTION_TYPE_PROP || "Type";
-    const statusProp = process.env.NOTION_STATUS_PROP || "Status";
-    const doneValue = process.env.NOTION_DONE_VALUE || "Done";
+    const taskProp = process.env.NOTION_TASK_PROP || "Task";
+    const sourceTaskProp = process.env.NOTION_SOURCE_TASK_PROP || "Source Task";
 
     if (!token || !dbId) {
       return res.status(500).json({
@@ -57,7 +57,7 @@ export default async function handler(req, res) {
 
         const dateP = props[dateProp] || {};
         const typeP = props[typeProp] || {};
-        const statusP = props[statusProp] || {};
+        const taskP = props[taskProp] || {};
 
         const rawDate = dateP?.date?.start;
         if (!rawDate) return null;
@@ -68,17 +68,21 @@ export default async function handler(req, res) {
           .slice(0, 10);
 
         const type =
-          typeP?.select?.name || typeP?.multi_select?.[0]?.name || "Other";
+          typeP?.select?.name ||
+          typeP?.status?.name ||
+          typeP?.multi_select?.[0]?.name ||
+          "Other";
 
-        const status = statusP?.status?.name || statusP?.select?.name || "";
-
-        const normalizedStatus = status.toLowerCase().trim();
+        const task =
+          taskP?.title?.[0]?.plain_text ||
+          taskP?.rich_text?.[0]?.plain_text ||
+          "Untitled";
 
         return {
           date: localDate,
           type: String(type).trim(),
-          status: String(status).trim(),
-          done: ["done", "completed", "hoàn thành"].includes(normalizedStatus),
+          task,
+          done: true,
         };
       })
       .filter(Boolean);
