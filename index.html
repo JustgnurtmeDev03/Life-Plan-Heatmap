@@ -1733,7 +1733,9 @@
               const cell = document.createElement("div");
               cell.className = "tcell";
               cell.style.background =
-                n === 0 ? "var(--bg3)" : type.ramp[Math.min(n, 4)];
+                n === 0 ? type.light : type.ramp[Math.min(n, 4)];
+              cell.style.opacity = n === 0 ? 0.65 : 1;
+              cell.style.border = `0.5px solid ${type.dark}22`;
 
               const label = d.toLocaleDateString("vi-VN", {
                 day: "2-digit",
